@@ -15,9 +15,9 @@
 */
 
 module.exports = (testSubject)=>{
-  if (!Array.isArray(testSubject)) {throw Error("no");}
+  if (!Array.isArray(testSubject)) {throwError();}
   if (testSubject.length < 2) {throwError();}
-
+  if (testSubject.some(e=>e < 1 || e > testSubject.length - 1)) {throwError();}
   if (testSubject.length === 2) {return testSubject[1];}
 
   let numUniqueDigits = testSubject.length - 1;

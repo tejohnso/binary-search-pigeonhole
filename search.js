@@ -14,39 +14,53 @@
  * 
 */
 
-module.exports = (testSubject)=>{
+module.exports = (testSubject, log = ()=>{})=>{
   if (!Array.isArray(testSubject)) {throwError();}
   const len = testSubject.length;
+  const adjustMatches = setMatches.bind(null, testSubject);
 
   if (len < 2) {throwError();}
   if (len === 2) {return testSubject[1];}
   if (testSubject.some(e=>e < 1 || e > len - 1)) {throwError();}
 
-  let floor = 1;
-  let ceil = len - 1;
+  let iterState = {
+    floor: 1,
+    ceil: len - 1,
+    mid: Math.floor(len / 2),
+    matches: 0
+  };
 
-  while (floor < ceil) {
-    let mid = Math.floor((ceil - floor) / 2) + floor;
-
-    let matchCount = testSubject.reduce((matches, e)=>{
-      return e >= floor && e <= mid ? matches + 1 : matches;
-    }, 0);
-
-    //console.log(floor, mid, ceil, matchCount > (mid - floor + 1));
-    if (matchCount > (mid - floor + 1)) {
-      ceil = mid;
-    } else {
-      floor = mid + 1;
-    }
+  while (iterState.floor < iterState.ceil) {
+    iterState = adjustRange(adjustMatches(iterState));
+    log(iterState);
   }
 
-  return floor;
+  return iterState.floor;
 };
+
+function setMatches(targetArr, iterState) {
+  const {floor, mid} = iterState;
+  const matches = targetArr.reduce((matches, e)=>{
+    return e >= floor && e <= mid ? matches + 1 : matches;
+  }, 0);
+
+  return { ...iterState, matches};
+}
+
+function adjustRange(iterState) {
+  let {matches, mid, floor, ceil} = iterState;
+  const inLowerRange = matches > (mid - floor + 1);
+
+  ceil = inLowerRange ? mid : ceil;
+  floor = inLowerRange ? floor : mid + 1;
+  mid = Math.floor((ceil - floor) / 2) + floor;
+
+  return {...iterState, ceil, floor, mid};
+}
 
 function throwError() {
   const err =
-`expecting an array of length n + 1 with unique digits in range 1 to n
+`expecting an array of length n + 1 having unique digits in range 1 to n
 plus at lest one duplicate`;
   throw Error(err);
 }
-

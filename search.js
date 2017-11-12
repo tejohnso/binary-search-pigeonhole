@@ -16,52 +16,31 @@
 
 module.exports = (testSubject)=>{
   if (!Array.isArray(testSubject)) {throwError();}
-  if (testSubject.length < 2) {throwError();}
-  if (testSubject.some(e=>e < 1 || e > testSubject.length - 1)) {throwError();}
-  if (testSubject.length === 2) {return testSubject[1];}
+  const len = testSubject.length;
 
-  let numUniqueDigits = testSubject.length - 1;
-  let rangeValStart = 1;
-  let rangeValEnd = Math.floor((testSubject.length - 1) / 2);
-  let duplicateInRange = undefined;
+  if (len < 2) {throwError();}
+  if (len === 2) {return testSubject[1];}
+  if (testSubject.some(e=>e < 1 || e > len - 1)) {throwError();}
 
-  let n = 0;
-  while (n < testSubject.length) {
-    n++;
-    duplicateInRange = scanRangeMatches(rangeValStart, rangeValEnd);
-    console.log(rangeValStart, rangeValEnd, duplicateInRange);
+  let floor = 1;
+  let ceil = len - 1;
 
-    let rangeLength = rangeValEnd - rangeValStart;
+  while (floor < ceil) {
+    let mid = Math.floor((ceil - floor) / 2) + floor;
 
-    if (duplicateInRange) {
-      if (rangeValEnd === rangeValStart) {return rangeValStart;}
-      rangeValEnd = recalcEnd(rangeLength, rangeValStart);
+    let matchCount = testSubject.reduce((matches, e)=>{
+      return e >= floor && e <= mid ? matches + 1 : matches;
+    }, 0);
+
+    //console.log(floor, mid, ceil, matchCount > (mid - floor + 1));
+    if (matchCount > (mid - floor + 1)) {
+      ceil = mid;
     } else {
-      rangeValStart = recalcStartForUpperRange(rangeValEnd);
-      rangeValEnd = recalcEnd(rangeLength, rangeValStart);
-      rangeValEnd = Math.min(rangeValEnd, numUniqueDigits);
+      floor = mid + 1;
     }
   }
 
-  function recalcStartForUpperRange(prevEnd) {return prevEnd + 1;}
-
-  function recalcEnd(rangeLength, start) {
-    return Math.floor((rangeLength) / 2) + start;
-  }
-
-  function scanRangeMatches(rangeValStart, rangeValEnd) {
-    let numDigitsToMatch = rangeValEnd - rangeValStart + 1;
-    let matchedValCount = 0;
-
-    for (let i = 0; i <= testSubject.length; i++) {
-      let match = testSubject[i] >= rangeValStart &&
-        testSubject[i] <= rangeValEnd; 
-
-      if (match) {matchedValCount++}
-    }
-
-    return matchedValCount > numDigitsToMatch;
-  }
+  return floor;
 };
 
 function throwError() {

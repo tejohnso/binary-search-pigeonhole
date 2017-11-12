@@ -1,7 +1,7 @@
 const search = require("./search");
 const sfy = JSON.stringify;
-const testCount = 20;
-const maxDigits = 5000;
+const testCount = 100;
+const maxDigits = 2000;
 const assert = require("assert");
 const oneToLen = len=>Math.floor(Math.random() * len + 1);
 
